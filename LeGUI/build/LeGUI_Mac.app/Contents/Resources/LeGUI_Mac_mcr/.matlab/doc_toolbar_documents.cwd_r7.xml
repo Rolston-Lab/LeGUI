@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ToolBar>
+   <Visible>
+      <Key>context.back</Key>
+      <Key>context.forward</Key>
+      <Key>context.up</Key>
+      <Key>cdToMatlabDrive</Key>
+      <Key>cwd.browse</Key>
+      <Key>cwd.address</Key>
+   </Visible>
+</ToolBar>
