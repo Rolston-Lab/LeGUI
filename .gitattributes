@@ -26,3 +26,4 @@
 *.pdf binary
 *.png binary
 *.xlsx binary
+*.nii binary
