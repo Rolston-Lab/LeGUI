@@ -16,7 +16,7 @@ end
 
 Img = Img>0.95;
 
-filtsizemm = 1;
+filtsizemm = 1.5;
 filtsizevox = filtsizemm*ones(1,3).*1./XYZScale;
 idx = mod(filtsizevox,2)<1;
 filtsizevox = floor(filtsizevox);
@@ -24,7 +24,6 @@ filtsizevox(idx) = filtsizevox(idx)+1;
 se = strel('cuboid',filtsizevox);
 
 Img = imerode(Img,se);
-Img = imdilate(Img,se);
 
 CC = bwconncomp(Img);
 S = regionprops(CC,'area');
@@ -36,7 +35,8 @@ px = CC.PixelIdxList(setdiff(1:length(A),idx));
 for k=1:length(px)
     Img(px{k}) = false;
 end
-% Img = imdilate(Img,se);
+
+Img = imdilate(Img,se);
 
 filtsizemm = 3;
 filtsizevox = filtsizemm*ones(1,3).*1./XYZScale;
