@@ -1,4 +1,4 @@
-LeGUI_Linux Executable
+LeGUI_Mac Executable
 
 1. Prerequisites for Deployment 
 
@@ -9,8 +9,9 @@ To find its location, enter
     >>mcrinstaller
       
 at the MATLAB prompt.
+NOTE: You will need administrator rights to run the MATLAB Runtime installer. 
 
-Alternatively, download and install the Linux version of the MATLAB Runtime for R2020b 
+Alternatively, download and install the Macintosh version of the MATLAB Runtime for R2020b 
 from the following link on the MathWorks website:
 
     https://www.mathworks.com/products/compiler/mcr/index.html
@@ -23,12 +24,11 @@ in the MathWorks Documentation Center.
 
 Files to Package for Standalone 
 ================================
--LeGUI_Linux 
--run_LeGUI_Linux.sh (shell script for temporarily setting environment variables and 
-                     executing the application)
+-run_LeGUI_Mac.sh (shell script for temporarily setting environment variables and 
+                   executing the application)
    -to run the shell script, type
    
-       ./run_LeGUI_Linux.sh <mcr_directory> <argument_list>
+       ./run_LeGUI_Mac.sh <mcr_directory> <argument_list>
        
     at Linux or Mac command prompt. <mcr_directory> is the directory 
     where version 9.9 of the MATLAB Runtime is installed or the directory where 
@@ -38,17 +38,22 @@ Files to Package for Standalone
     If you have version 9.9 of the MATLAB Runtime installed in 
     /mathworks/home/application/v99, run the shell script as:
     
-       ./run_LeGUI_Linux.sh /mathworks/home/application/v99
+       ./run_LeGUI_Mac.sh /mathworks/home/application/v99
        
     If you have MATLAB installed in /mathworks/devel/application/matlab, 
     run the shell script as:
     
-       ./run_LeGUI_Linux.sh /mathworks/devel/application/matlab
--MCRInstaller.zip
+       ./run_LeGUI_Mac.sh /mathworks/devel/application/matlab
+-MCRInstaller.zip 
     Note: if end users are unable to download the MATLAB Runtime using the
     instructions in the previous section, include it when building your 
     component by clicking the "Runtime included in package" link in the
     Deployment Tool.
+-The Macintosh bundle directory structure LeGUI_Mac.app 
+    Note: this can be stored in an archive file with the zip command 
+    zip -r LeGUI_Mac.zip LeGUI_Mac.app
+    or the tar command 
+    tar -cvf LeGUI_Mac.tar LeGUI_Mac.app
 -This readme file 
 
 
@@ -63,22 +68,18 @@ Center.
 
 4. Appendix 
 
-A. Linux systems:
+A. Mac systems:
 In the following directions, replace MR/v99 by the directory on the target machine where 
    MATLAB is installed, or MR by the directory where the MATLAB Runtime is installed.
 
-(1) Set the environment variable XAPPLRESDIR to this value:
+If the environment variable DYLD_LIBRARY_PATH is undefined, set it to the following 
+   string:
 
-MR/v99/X11/app-defaults
-
-
-(2) If the environment variable LD_LIBRARY_PATH is undefined, set it to the following:
-
-MR/v99/runtime/glnxa64:MR/v99/bin/glnxa64:MR/v99/sys/os/glnxa64:MR/v99/sys/opengl/lib/glnxa64
+MR/v99/runtime/maci64:MR/v99/sys/os/maci64:MR/v99/bin/maci64
 
 If it is defined, set it to the following:
 
-${LD_LIBRARY_PATH}:MR/v99/runtime/glnxa64:MR/v99/bin/glnxa64:MR/v99/sys/os/glnxa64:MR/v99/sys/opengl/lib/glnxa64
+${DYLD_LIBRARY_PATH}:MR/v99/runtime/maci64:MR/v99/sys/os/maci64:MR/v99/bin/maci64
 
     For more detailed information about setting the MATLAB Runtime paths, see Package and 
    Distribute in the MATLAB Compiler documentation in the MathWorks Documentation Center.
@@ -91,12 +92,17 @@ ${LD_LIBRARY_PATH}:MR/v99/runtime/glnxa64:MR/v99/bin/glnxa64:MR/v99/sys/os/glnxa
         NOTE: The environment variable syntax utilizes forward 
               slashes (/), delimited by colons (:).  
         NOTE: When deploying standalone applications, you can
-              run the shell script file run_LeGUI_Linux.sh 
+              run the shell script file run_LeGUI_Mac.sh 
               instead of setting environment variables. See 
               section 2 "Files to Deploy and Package".    
 
 
 
+5. Launching application using Macintosh finder
+
+If the application is purely graphical, that is, it doesn't read from standard in or 
+write to standard out or standard error, it may be launched in the finder just like any 
+other Macintosh application.
 
 
 
