@@ -58,7 +58,8 @@ Img = imerode(Img,se);
 
 ProjImg = smooth3(Img,'box',filtsizevox);
 
-DSFactor = round(mean(size(Img))/100)-2; DSFactor(DSFactor<1) = 1; DSFactor(DSFactor>3) = 3; %downsample factor (larger number for larger image)
+% DSFactor = round(mean(size(Img))/100)-2; DSFactor(DSFactor<1) = 1; DSFactor(DSFactor>3) = 3; %downsample factor (larger number for larger image)
+DSFactor = 3; %going to fix this value at 3 since the mm/vox resolution is also fixed at 0.4
 
 [BrainImgX,BrainImgY,BrainImgZ,BrainImg] = reducevolume(BrainImg,DSFactor); %downsample based on image size
 BrainSurf = isosurface(BrainImgX,BrainImgY,BrainImgZ,BrainImg,0.3); %increase this value to erode image (default 0.3)
@@ -70,4 +71,4 @@ ProjSurf = isosurface(ProjImgX,ProjImgY,ProjImgZ,ProjImg,0.3); %increase this va
 ProjSurf.vertices(:,1:2) = ProjSurf.vertices(:,[2,1]); % x and y are swapped in spm world
 ProjSurf.vertices = ProjSurf.vertices*ImgInfo.mat(1:3,1:3)'+repmat(ImgInfo.mat(1:3,4)',size(ProjSurf.vertices,1),1); % rotate/scale/translate to world space
 
-
+ProjSurf = LeG_removeSubSurf(ProjSurf); %removes any smaller enclosed surfaces within the main projection surface (i.e. ventricle remnants, etc.)
