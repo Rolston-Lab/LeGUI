@@ -309,10 +309,17 @@ classdef LeG_vox2atlaslabel < handle
             atlasimg = zeros(sz_vox(1:3));
             atlasimg(lidx_vox) = round(obj.AtlasData{Idx}(lidx_atlas));
                       
-            %saving
+            %Saving
+            %Pinfo scale/offset factors should be 1 and 0 to avoid rounding
+            %errors with atlas labeled data. If pinfo is not provided,
+            %scale/offset will be calculated based on the data values. This
+            %results in the data being scaled when saving and then
+            %converted back to integers when loading, which adds a rounding
+            %error (i.e. decimal) to each integer.
             info = spm_vol(obj.DefFile);
             info = rmfield(info,'private');
-            info = rmfield(info,'pinfo');
+%             info = rmfield(info,'pinfo');
+            info.pinfo = [1;0;352]; %pinfo(1:2) = scale/offset factors and pinfo(3) = 352 for NIfTI-1 or 544 for NIfTI-2 (see spm_create_vol.m)
             info.dt = [4,0]; %[int16 datatype, little-endian] (16 is float32, 1 is big-endian)
             info.descrip = 'atlas label deformation to patient space';
             info.fname = fullfile(fileparts(obj.DefFile),['lw',AtlasName,'.nii']);
