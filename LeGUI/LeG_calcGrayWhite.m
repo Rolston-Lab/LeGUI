@@ -29,7 +29,14 @@ if mGrayVal>0.1 || mWhiteVal>0.1
             end
         end
     else
-        ElecType = 'Gray';
+        switch stats.ranksum
+            case 1 %if only one voxel provided (i.e. click on 2D away from electrode)
+                ElecType = 'White';
+            case 2
+                ElecType = 'Gray';
+            otherwise
+                ElecType = 'Gray';
+        end
     end
 else
     ElecType = 'Unknown';
