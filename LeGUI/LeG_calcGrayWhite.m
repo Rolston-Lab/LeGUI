@@ -1,7 +1,7 @@
 function [ElecType,ElecIdxLin] = LeG_calcGrayWhite(GrayImg,WhiteImg,ElecFullIdx)
 
 %Calculates gray/white class for and electrode given the index location
-%"ElecFullIdx". ElecFullIdx is a 3d matrix of index values specifying the
+%"ElecFullIdx". ElecFullIdx is a matrix of index values specifying the
 %volume of the electrode.
 %
 %Tyler Davis
