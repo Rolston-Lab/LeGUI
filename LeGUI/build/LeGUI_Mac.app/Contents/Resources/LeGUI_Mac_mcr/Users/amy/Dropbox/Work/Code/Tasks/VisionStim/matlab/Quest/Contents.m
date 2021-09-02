@@ -1,2 +1,0 @@
-% Psychtoolbox:Quest.
-%
