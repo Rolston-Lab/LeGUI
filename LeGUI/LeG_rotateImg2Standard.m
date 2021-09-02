@@ -54,6 +54,23 @@ eyemat = eye(4);
 eyemat(1:3,1:3) = diag(scl);
 eyemat(1:3,4) = trans;
 
+%%%%%%%%%%%%%%%%%%%%% flip l/r for RAS orientation %%%%%%%%%%%%%%%%%%%%%
+x = imgInfo.mat(1:3,1); [~,xi] = max(abs(x)); xs = sign(x(xi));
+y = imgInfo.mat(1:3,2); [~,yi] = max(abs(y)); ys = sign(y(yi));
+z = imgInfo.mat(1:3,3); [~,zi] = max(abs(z)); zs = sign(z(zi));
+if xs==1 %need to perform a left/right flip (check this!!)
+    p = [2,1,3];
+    imgR = permute(imgR,p);
+    imgR = fliplr(imgR);
+    imgR = ipermute(imgR,p);
+    disp('Left/right flip was performed!');
+end
+
+if ~all([sum(x==0),sum(y==0),sum(z==0)]==2)
+    disp(num2str(imgInfo.mat));
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 imgInfo.mat = eyemat;
 imgInfo.dim = size(imgR);
 spm_write_vol(imgInfo,imgR);
