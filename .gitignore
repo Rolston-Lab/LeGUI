@@ -1,6 +1,9 @@
 LeG_lastDir.txt
 LeG_lastPath.txt
 *.asv
-build/
-atlases/Thomas.nii
-atlases/Thomas.txt
+build/*
+atlases/*
+!atlases/Anat.nii
+!atlases/Anat.txt
+!atlases/AnatMacro.nii
+!atlases/AnatMacro.txt
