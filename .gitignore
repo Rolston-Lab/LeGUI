@@ -2,7 +2,7 @@ LeG_lastDir.txt
 LeG_lastPath.txt
 *.asv
 LeGUI/build/*
-!LeGUI/build/atlases
+!LeGUI/build/atlases/
 LeGUI/atlases/*
 !LeGUI/atlases/Anat.*
 !LeGUI/atlases/AnatMacro.*
