@@ -2,3 +2,5 @@ LeG_lastDir.txt
 LeG_lastPath.txt
 *.asv
 build/
+atlases/Thomas.nii
+atlases/Thomas.txt
