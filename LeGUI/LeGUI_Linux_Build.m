@@ -2,11 +2,12 @@ function LeGUI_Linux_Build(varargin)
 % -a adds files to compiled executable, -N clears matlab path except for main matlab folder, -p adds toolbox
 % cfgroot is the root location of archived files (-a flag) for deployed code (mfilename('fullpath') works in a deployed environment) 
 
+Version = '1.0';
 if nargin
-    RootDir = varargin{1};
-else
-    RootDir = fileparts(mfilename('fullpath'));
+    Version = varargin{1};
 end
+disp(['Building version ',Version]);
+RootDir = fileparts(mfilename('fullpath'));
 BuildDir = fullfile(RootDir,'build');
 MainFile = fullfile(RootDir,'LeGUI.mlapp');
 DepCell = {
@@ -175,5 +176,16 @@ DepStrFull = cell2mat(DepCellFull');
 
 MccStr = ['mcc -v -m ',MainFile,' -d ',BuildDir,' -o LeGUI_Linux',DepStrFull];
 eval(MccStr);
+
+opts = compiler.package.InstallerOptions(...
+    'ApplicationName',['LeGUI_Linux_v',Version],...
+    'AuthorCompany','University of Utah',...
+    'AuthorName','Tyler Davis',...
+    'InstallerName',['LeGUI_Linux_Installer_v',Version],...
+    'OutputDir',BuildDir,...
+    'Version',Version,...
+    'Summary','Software for localizing intracranial electrodes');
+
+compiler.package.installer(fullfile(BuildDir,'LeGUI_Linux'),fullfile(BuildDir,'requiredMCRProducts.txt'),'Options',opts)
 
 

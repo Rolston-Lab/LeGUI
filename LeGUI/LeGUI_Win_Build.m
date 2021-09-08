@@ -2,11 +2,12 @@ function LeGUI_Win_Build(varargin)
 % -a adds files to compiled executable, -N clears matlab path except for main matlab folder, -p adds toolbox
 % cfgroot is the root location of archived files (-a flag) for deployed code (mfilename('fullpath') works in a deployed environment) 
 
+Version = '1.0';
 if nargin
-    RootDir = varargin{1};
-else
-    RootDir = fileparts(mfilename('fullpath'));
+    Version = varargin{1};
 end
+disp(['Building version ',Version]);
+RootDir = fileparts(mfilename('fullpath'));
 BuildDir = fullfile(RootDir,'build');
 MainFile = fullfile(RootDir,'LeGUI.mlapp');
 DepCell = {
@@ -173,8 +174,18 @@ DepCell = {
 DepCellFull = cellfun(@(x,y)fullfile([' -a ',x],y),repmat({RootDir},length(DepCell),1),DepCell,'uniformoutput',false);
 DepStrFull = cell2mat(DepCellFull');
 
-%MccStr = ['mcc -v -m ',MainFile,' -d ',BuildDir,DepStrFull];
 MccStr = ['mcc -v -m ',MainFile,' -d ',BuildDir,' -o LeGUI_Win',DepStrFull];
 eval(MccStr);
+
+opts = compiler.package.InstallerOptions(...
+    'ApplicationName',['LeGUI_Win_v',Version],...
+    'AuthorCompany','University of Utah',...
+    'AuthorName','Tyler Davis',...
+    'InstallerName',['LeGUI_Win_Installer_v',Version],...
+    'OutputDir',BuildDir,...
+    'Version',Version,...
+    'Summary','Software for localizing intracranial electrodes');
+
+compiler.package.installer(fullfile(BuildDir,'LeGUI_Win.exe'),fullfile(BuildDir,'requiredMCRProducts.txt'),'Options',opts)
 
 
