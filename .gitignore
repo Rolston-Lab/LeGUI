@@ -1,7 +1,7 @@
 LeG_lastDir.txt
 LeG_lastPath.txt
 *.asv
-build/*
+/build/*
 atlases/*
 !atlases/Anat.nii
 !atlases/Anat.txt
