@@ -4,3 +4,6 @@ Fast, easy-to-use intracranial electrode localization software built entirely in
 
 Download the latest release here:
 https://github.com/Rolston-Lab/LeGUI/releases/latest#user-content-downloads
+
+Getting started:
+https://github.com/Rolston-Lab/LeGUI/wiki
