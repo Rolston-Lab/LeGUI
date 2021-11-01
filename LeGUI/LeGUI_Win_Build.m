@@ -2,7 +2,7 @@ function LeGUI_Win_Build(varargin)
 % -a adds files to compiled executable, -N clears matlab path except for main matlab folder, -p adds toolbox
 % cfgroot is the root location of archived files (-a flag) for deployed code (mfilename('fullpath') works in a deployed environment) 
 
-Version = '1.0';
+Version = '1.1';
 if nargin
     Version = varargin{1};
 end
