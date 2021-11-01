@@ -1,6 +1,7 @@
 function [WC,T] = LeG_autoElecs(app)
 
 Img = app.CTImg;
+MaxElecs = app.detect.maxelecs;
 
 ElecRad = 2; %total radius of standard ad-tech grid electrode (4mm dia, 2.3mm exposed)
 XYZScale = app.XYZScale; %need to swap x/y if comparing with connected components
@@ -72,7 +73,7 @@ if cc.NumObjects>0
     end
 end
 if skipflag %if no stable clusters are found, do this
-    idx = find(NumObj>10 & NumObj<250);
+    idx = find(NumObj>10 & NumObj<MaxElecs);
     if ~isempty(idx)
         idx = idx(round(end/2));
     else
@@ -87,7 +88,7 @@ T = Thresh(idx);
 %outlier removal
 pd = pdist2(WC,WC,'euclidean','smallest',2); %find closest electrode to each detected electrode
 WC(pd(end,:)*mean(XYZScale)<1,:) = []; %remove detections that are closer than 1mm
-WC(251:end,:) = []; %remove if more than 250 detections
+WC(MaxElecs+1:end,:) = []; %remove if more than 250 detections
 
 %plotting results
 fH = figure('position',[50,50,400,400],'name',app.PatientIDStr,'visible','off'); 
