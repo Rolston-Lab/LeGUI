@@ -7,6 +7,7 @@ classdef LeG_vox2atlaslabel < handle
         AtlasData; AtlasMat; AtlasCnt; AtlasImg;
         DefFile; DefMat; Def; %ptvox2mnimm deformation (iy_MR.nii)
         VoxDef; %ptvox2atlasvox deformation (iy_MR.nii transformed using inv(atlasmat) -> mm2vox) 
+        ProbRadius; %radius of sphere in mm for probability calculation
     end
     
     methods
@@ -144,11 +145,16 @@ classdef LeG_vox2atlaslabel < handle
             %Uses voxel COM (COMIdx) to create a sphere of specified radius
             %for finding label probabilities for specified atlas
             %(AtlasName). COMIdx are voxel indices in patient space.
-            
-            RadiusMM = 10; %listening radius (mm) for finding labels
-            
+                        
             if isempty(obj.Def)
                 obj.loadDefFile(varargin{:});
+            else
+                obj.parseInput(varargin{:});
+            end
+
+            RadiusMM = 10; %listening radius (mm) for finding labels
+            if ~isempty(obj.ProbRadius)
+                RadiusMM = obj.ProbRadius;
             end
             
             Idx = strcmp(regexprep(obj.AtlasNames,'\.nii$',''),AtlasName);            
