@@ -9,8 +9,10 @@ function NiiFileOut = LeG_rotateImg2Standard(NiiFile,varargin)
 
 imgInfo = spm_vol(NiiFile);
 img = spm_read_vols(imgInfo);
-imgCenter = round(size(img)/2);
+imgSize = size(img);
+imgCenter = round(imgSize/2);
 imgScale = sqrt(sum(imgInfo.mat(1:3,1:3).^2));
+% imgCenterMM = imgCenter.*imgScale;
 
 [path,file,ext] = fileparts(imgInfo.fname);
 if isempty(regexp(file,'^sd','once'))
@@ -22,6 +24,36 @@ end
 if nargin>1
     imgInfo.mat = varargin{1};
 end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% x = imgInfo.mat(1:3,1); [~,xi] = max(abs(x)); xs = sign(x(xi));
+% y = imgInfo.mat(1:3,2); [~,yi] = max(abs(y)); ys = sign(y(yi));
+% z = imgInfo.mat(1:3,3); [~,zi] = max(abs(z)); zs = sign(z(zi));
+% 
+% omat = imgInfo.mat; %original transform
+% omat(1,4) = imgCenterMM(1)*sign(omat(1,4));
+% omat(2,4) = imgCenterMM(2)*sign(omat(2,4));
+% omat(3,4) = imgCenterMM(3)*sign(omat(3,4));
+% 
+% trans = [imgCenterMM(xi),imgCenterMM(yi),imgCenterMM(zi)]; trans(2:3) = -trans(2:3);
+% scl = [imgScale(xi),imgScale(yi),imgScale(zi)]; scl(1) = -scl(1);
+% 
+% nmat = eye(4); %new (desired) transform
+% nmat(1:3,1:3) = diag(scl);
+% nmat(1:3,4) = trans;
+% 
+% rmat = omat\nmat;
+% rmat(1:3,4) = zeros(3,1);
+% 
+% tform = affine3d(rmat);
+% sameAsInput = affineOutputView(imgSize([2,1,3]),tform,'BoundsStyle','SameAsInput');
+
+% imgR = imwarp(permute(img,[2,1,3]),tform,'OutputView',sameAsInput);
+% imgR = imwarp(img,tform);
+% imgR = imwarp(permute(img,[2,1,3]),tform);
+% imgR = ipermute(imgR,[2,1,3]);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 %Performing 90 deg rotations to put in standard space
 eyemat = eye(4); 
@@ -55,23 +87,24 @@ eyemat(1:3,1:3) = diag(scl);
 eyemat(1:3,4) = trans;
 
 %%%%%%%%%%%%%%%%%%%%% flip l/r for RAS orientation %%%%%%%%%%%%%%%%%%%%%
-x = imgInfo.mat(1:3,1); [~,xi] = max(abs(x)); xs = sign(x(xi));
-y = imgInfo.mat(1:3,2); [~,yi] = max(abs(y)); ys = sign(y(yi));
-z = imgInfo.mat(1:3,3); [~,zi] = max(abs(z)); zs = sign(z(zi));
-if xs==1 %need to perform a left/right flip (check this!!)
-    p = [2,1,3];
-    imgR = permute(imgR,p);
-    imgR = fliplr(imgR);
-    imgR = ipermute(imgR,p);
-    disp('Left/right flip was performed!');
-end
-
-if ~all([sum(x==0),sum(y==0),sum(z==0)]==2)
-    disp(num2str(imgInfo.mat));
-end
+% x = imgInfo.mat(1:3,1); [~,xi] = max(abs(x)); xs = sign(x(xi));
+% y = imgInfo.mat(1:3,2); [~,yi] = max(abs(y)); ys = sign(y(yi));
+% z = imgInfo.mat(1:3,3); [~,zi] = max(abs(z)); zs = sign(z(zi));
+% if xs==1 %need to perform a left/right flip (check this!!)
+%     p = [2,1,3];
+%     imgR = permute(imgR,p);
+%     imgR = fliplr(imgR);
+%     imgR = ipermute(imgR,p);
+%     disp('Left/right flip was performed!');
+% end
+% 
+% if ~all([sum(x==0),sum(y==0),sum(z==0)]==2)
+%     disp(num2str(imgInfo.mat));
+% end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 imgInfo.mat = eyemat;
+% imgInfo.mat = nmat;
 imgInfo.dim = size(imgR);
 spm_write_vol(imgInfo,imgR);
 
