@@ -184,6 +184,8 @@ excludedname = fullfile(BuildDir,'mccExcludedFiles.log');
 readmename = fullfile(BuildDir,'readme.txt');
 requiredname = fullfile(BuildDir,'requiredMCRProducts.txt');
 scriptname = fullfile(BuildDir,'run_LeGUI_Mac.sh');
+includedname = fullfile(BuildDir,'includedSupportPackages.txt');
+unresolvedname = fullfile(BuildDir,'unresolvedSymbols.txt');
 
 zip(zipname,{exename,atlasname,scriptname});
 
@@ -192,7 +194,7 @@ try
 catch
     rmdir(exename,'s')
 end
-delete(excludedname, readmename, requiredname, scriptname);
+delete(excludedname, readmename, requiredname, scriptname, includedname, unresolvedname);
 
 % opts = compiler.package.InstallerOptions(...
 %     'ApplicationName',['LeGUI_Mac_v',Version],...

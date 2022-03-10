@@ -183,10 +183,12 @@ atlasname = fullfile(BuildDir,'atlases');
 excludedname = fullfile(BuildDir,'mccExcludedFiles.log');
 readmename = fullfile(BuildDir,'readme.txt');
 requiredname = fullfile(BuildDir,'requiredMCRProducts.txt');
+includedname = fullfile(BuildDir,'includedSupportPackages.txt');
+unresolvedname = fullfile(BuildDir,'unresolvedSymbols.txt');
 
 zip(zipname,{exename,atlasname});
 
-delete(exename, excludedname, readmename, requiredname);
+delete(exename, excludedname, readmename, requiredname, includedname, unresolvedname);
 
 
 

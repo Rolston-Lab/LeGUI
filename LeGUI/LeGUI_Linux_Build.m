@@ -184,10 +184,12 @@ excludedname = fullfile(BuildDir,'mccExcludedFiles.log');
 readmename = fullfile(BuildDir,'readme.txt');
 requiredname = fullfile(BuildDir,'requiredMCRProducts.txt');
 scriptname = fullfile(BuildDir,'run_LeGUI_Linux.sh');
+includedname = fullfile(BuildDir,'includedSupportPackages.txt');
+unresolvedname = fullfile(BuildDir,'unresolvedSymbols.txt');
 
 zip(zipname,{exename,atlasname,scriptname});
 
-delete(exename, excludedname, readmename, requiredname, scriptname);
+delete(exename, excludedname, readmename, requiredname, scriptname, includedname, unresolvedname);
 
 % opts = compiler.package.InstallerOptions(...
 %     'ApplicationName',['LeGUI_Linux_v',Version],...
