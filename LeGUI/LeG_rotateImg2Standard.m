@@ -5,7 +5,7 @@ function NiiFileOut = LeG_rotateImg2Standard(NiiFile,varargin)
 %mirrored ([-1 0 0; 0 1 0; 0 0 1]). Saves with "sd" prefix.
 %
 %Tyler Davis
-%20190731
+%20220310
 
 imgInfo = spm_vol(NiiFile);
 img = spm_read_vols(imgInfo);
@@ -14,51 +14,74 @@ imgCenter = round(imgSize/2);
 imgScale = sqrt(sum(imgInfo.mat(1:3,1:3).^2));
 % imgCenterMM = imgCenter.*imgScale;
 
+% imgInfoNew = imgInfo;
+
 [path,file,ext] = fileparts(imgInfo.fname);
 if isempty(regexp(file,'^sd','once'))
     imgInfo.fname = fullfile(path,['sd',file,ext]);
+%     imgInfoNew.fname = fullfile(path,['nw',file,ext]);
 end
 
-%transform can be provided as input instead of getting from nifti file
-%header
-if nargin>1
-    imgInfo.mat = varargin{1};
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% Pre-rotation %%%%%%%%%%%%%%%%
 % x = imgInfo.mat(1:3,1); [~,xi] = max(abs(x)); xs = sign(x(xi));
 % y = imgInfo.mat(1:3,2); [~,yi] = max(abs(y)); ys = sign(y(yi));
 % z = imgInfo.mat(1:3,3); [~,zi] = max(abs(z)); zs = sign(z(zi));
 % 
-% omat = imgInfo.mat; %original transform
-% omat(1,4) = imgCenterMM(1)*sign(omat(1,4));
-% omat(2,4) = imgCenterMM(2)*sign(omat(2,4));
-% omat(3,4) = imgCenterMM(3)*sign(omat(3,4));
+% nmat = zeros(4); %new (desired) matrix
+% nmat(xi,1) = imgScale(1)*xs;
+% nmat(yi,2) = imgScale(2)*ys;
+% nmat(zi,3) = imgScale(3)*zs;
+% nmat(1,4) = imgCenterMM(1)*sign(imgInfo.mat(1,4));
+% nmat(2,4) = imgCenterMM(2)*sign(imgInfo.mat(2,4));
+% nmat(3,4) = imgCenterMM(3)*sign(imgInfo.mat(3,4));
+% nmat(4,4) = 1;
 % 
-% trans = [imgCenterMM(xi),imgCenterMM(yi),imgCenterMM(zi)]; trans(2:3) = -trans(2:3);
-% scl = [imgScale(xi),imgScale(yi),imgScale(zi)]; scl(1) = -scl(1);
+% % rmat = nmat\imgInfo.mat; %mapping from imgInfo.mat into nmat (vox2vox)
 % 
-% nmat = eye(4); %new (desired) transform
-% nmat(1:3,1:3) = diag(scl);
-% nmat(1:3,4) = trans;
+% flags.mask = 1;
+% flags.interp = 4; %4th order bspline
+% flags.which = [1,0];
+% flags.wrap = [0,0,0];
+% flags.prefix = '';
 % 
-% rmat = omat\nmat;
-% rmat(1:3,4) = zeros(3,1);
+% imgInfo.mat(1:3,4) = nmat(1:3,4); %might want the translations to be the same and new matrix
+% imgInfoNew.mat = nmat; %write desired matrix to header
 % 
-% tform = affine3d(rmat);
-% sameAsInput = affineOutputView(imgSize([2,1,3]),tform,'BoundsStyle','SameAsInput');
-
-% imgR = imwarp(permute(img,[2,1,3]),tform,'OutputView',sameAsInput);
-% imgR = imwarp(img,tform);
-% imgR = imwarp(permute(img,[2,1,3]),tform);
-% imgR = ipermute(imgR,[2,1,3]);
+% disp([imgInfo.mat,nan(4,1),nmat]);
+% mmvox = sqrt(sum((imgInfo.mat*ones(4,1)-(imgInfo.mat*(diag(ones(1,4))+1))).^2)); %calculating distance in mm between adjacent voxels along each dimension
+% mmvoxnew = sqrt(sum((nmat*ones(4,1)-(nmat*(diag(ones(1,4))+1))).^2));
+% disp([mmvox(1:3),nan,mmvoxnew(1:3)])
+% 
+% spm_write_vol(imgInfo,img); %create the nifti file (sdMR.nii) with the original matrix
+% spm_write_vol(imgInfoNew,img); %create the nifti file (orMR.nii) with the new matrix
+% 
+% P(1) = {[imgInfoNew.fname,',1']}; %contains the desired orientation
+% P(2) = {[imgInfo.fname,',1']}; %contains the sd prefix and the original orientation (this one is resliced)
+% 
+% fHProg = findobj('tag','Interactive');
+% if isempty(fHProg)
+%     fHProg = figure('tag','Interactive'); %progress figure
+% end
+% spm_reslice(P,flags);
+% 
+% imgInfo = spm_vol(imgInfo.fname);
+% img = spm_read_vols(imgInfo);
+% 
+% nSize = size(img);
+% nScale = sqrt(sum(imgInfo.mat(1:3,1:3).^2));
+% if any(nSize~=imgSize)||any(round(nScale,4)~=round(imgScale,4))||any(any(round(imgInfo.mat,4)~=round(nmat,4)))
+%     msgbox('Pre-rotation failed in LeG_rotateImg2Standard');
+% end
+% delete(imgInfoNew.fname);  
+% 
+% close(fHProg); pause(0.1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %Performing 90 deg rotations to put in standard space
 eyemat = eye(4); 
 eyemat(1,1) = -1;
-rmat = imgInfo.mat\eyemat; %imgInfo.mat*rmat = eyemat
+rmat = imgInfo.mat\eyemat; %imgInfo.mat*rmat = eyemat (this might be reversed - eyemat\imgInfo.mat is voxvox transform from imgInfo to eyemat)
 b = spm_imatrix(rmat);
 rvec = b(4:6);
 
@@ -86,25 +109,15 @@ eyemat = eye(4);
 eyemat(1:3,1:3) = diag(scl);
 eyemat(1:3,4) = trans;
 
-%%%%%%%%%%%%%%%%%%%%% flip l/r for RAS orientation %%%%%%%%%%%%%%%%%%%%%
-% x = imgInfo.mat(1:3,1); [~,xi] = max(abs(x)); xs = sign(x(xi));
-% y = imgInfo.mat(1:3,2); [~,yi] = max(abs(y)); ys = sign(y(yi));
-% z = imgInfo.mat(1:3,3); [~,zi] = max(abs(z)); zs = sign(z(zi));
-% if xs==1 %need to perform a left/right flip (check this!!)
-%     p = [2,1,3];
-%     imgR = permute(imgR,p);
-%     imgR = fliplr(imgR);
-%     imgR = ipermute(imgR,p);
-%     disp('Left/right flip was performed!');
-% end
-% 
-% if ~all([sum(x==0),sum(y==0),sum(z==0)]==2)
-%     disp(num2str(imgInfo.mat));
-% end
+%%%%%%%%%%%%%%%%%%%%% check if a flip is needed %%%%%%%%%%%%%%%%%%%%%
+imat = imgInfo.mat*rmat0;
+x = imat(1:3,1); [~,xi] = max(abs(x)); xs = sign(x(xi));
+if xs==1
+    msgbox('A left/right flip might be needed!')
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 imgInfo.mat = eyemat;
-% imgInfo.mat = nmat;
 imgInfo.dim = size(imgR);
 spm_write_vol(imgInfo,imgR);
 
