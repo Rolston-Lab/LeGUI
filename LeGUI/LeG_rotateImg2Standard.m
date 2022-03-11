@@ -113,7 +113,7 @@ eyemat(1:3,4) = trans;
 imat = imgInfo.mat*rmat0;
 x = imat(1:3,1); [~,xi] = max(abs(x)); xs = sign(x(xi));
 FlipB = false;
-if xs==1 && any(ishandle(varargin{1}))
+if xs==1
     FlipB = true;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
