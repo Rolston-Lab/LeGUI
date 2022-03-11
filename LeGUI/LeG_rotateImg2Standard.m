@@ -1,4 +1,4 @@
-function NiiFileOut = LeG_rotateImg2Standard(NiiFile,varargin)
+function [NiiFileOut,FlipB] = LeG_rotateImg2Standard(NiiFile,varargin)
 %Performs 90 deg rotations to place image in standard space with dim1 (x ->
 %saggital plane), dim2 (y -> coronal plane), dim3 (z -> axial plane). Finds
 %matrix to transform nifti affine matrix to identity matrix with 1st dim
@@ -112,8 +112,9 @@ eyemat(1:3,4) = trans;
 %%%%%%%%%%%%%%%%%%%%% check if a flip is needed %%%%%%%%%%%%%%%%%%%%%
 imat = imgInfo.mat*rmat0;
 x = imat(1:3,1); [~,xi] = max(abs(x)); xs = sign(x(xi));
-if xs==1
-    msgbox('A left/right flip might be needed!')
+FlipB = false;
+if xs==1 && any(ishandle(varargin{1}))
+    FlipB = true;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
