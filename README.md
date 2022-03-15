@@ -2,17 +2,17 @@
 
 Fast, easy-to-use intracranial electrode localization software built entirely in MATLAB with core image processing performed using SPM12 and support for Windows, Mac, and Linux platforms
 
-Download the latest release here:
+Latest release:
 https://github.com/Rolston-Lab/LeGUI/releases/latest#user-content-downloads
 
-Download the installation guide here:
+Installation guide:
 https://github.com/Rolston-Lab/LeGUI/blob/main/LeGUI_InstallationGuide.pdf
 
-Download the user manual here:
+User manual:
 https://github.com/Rolston-Lab/LeGUI/blob/main/LeGUI_UserManual.pdf
 
-The manuscript is here:
+Manuscript:
 https://www.frontiersin.org/articles/10.3389/fnins.2021.769872/full
 
-The wiki is here:
+Wiki:
 https://github.com/Rolston-Lab/LeGUI/wiki
