@@ -11,5 +11,8 @@ https://github.com/Rolston-Lab/LeGUI/blob/main/LeGUI_InstallationGuide.pdf
 Download the user manual here:
 https://github.com/Rolston-Lab/LeGUI/blob/main/LeGUI_UserManual.pdf
 
+The manuscript is here:
+https://www.frontiersin.org/articles/10.3389/fnins.2021.769872/full
+
 The wiki is here:
 https://github.com/Rolston-Lab/LeGUI/wiki
