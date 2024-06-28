@@ -141,6 +141,46 @@ classdef LeG_vox2atlaslabel < handle
             Label = getLabels(AtlasVal, obj.AtlasVals{Idx}, obj.AtlasLabels{Idx});
         end %end findLabel
         
+        function [Label,XYZMNImm] = findLabel2(obj, XYZIdx, AtlasName, varargin)
+            %[Label,XYZMNImm] = findLabel([1,1,1],'NMM'); XYZIdx are voxel
+            %indices (not mm) in original image (not mni) associated with
+            %deformation file (DefFile). This version (#2) uses the atlas
+            %label image warped to pt space (AtlasImg) to calc the
+            %probablilities. If a non-MNI atlas is created in patient space
+            %(i.e. ThomasNew), this function will return accurate labels.
+            if isempty(obj.Def)
+                obj.loadDefFile(varargin{:});
+            end
+
+            Idx = strcmp(regexprep(obj.AtlasNames,'\.nii$',''),AtlasName); 
+            if isempty(obj.AtlasImg{Idx})
+                obj.warpAtlas2PatientSpace(AtlasName,varargin{:});
+            end
+           
+            %%%%%%%%% Faster linear index version %%%%%%%%%%%%%%%%
+            sz_vox = size(obj.Def,[1,2,3]);
+            n_vox = prod(sz_vox);
+
+            lidx = calcLinIdx(sz_vox,XYZIdx);
+
+            %MNI mm locations for each voxel in pt space (XYZIdx)
+            MNImm = nan(length(lidx),3);
+            MNImm(:,1) = obj.Def(lidx);
+            MNImm(:,2) = obj.Def(lidx+n_vox);
+            MNImm(:,3) = obj.Def(lidx+2*n_vox);
+            XYZMNImm = nanmean(MNImm,1);
+
+            %If AtlasImg is not the same size as Def, then lidx needs to be
+            %recalculated. This can occur with custom atlases that are
+            %generated outside LeGUI like ThomasNew, etc.
+            lidx = calcLinIdx(size(obj.AtlasImg{Idx},[1,2,3]),XYZIdx);
+
+            AtlasVal = round(obj.AtlasImg{Idx}(lidx));
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+            Label = getLabels(AtlasVal, obj.AtlasVals{Idx}, obj.AtlasLabels{Idx});
+        end %end findLabel
+
         function LabelProbs = findLabelProbabilities(obj, COMIdx, AtlasName, varargin)
             %Uses voxel COM (COMIdx) to create a sphere of specified radius
             %for finding label probabilities for specified atlas
@@ -225,14 +265,22 @@ classdef LeG_vox2atlaslabel < handle
             %(AtlasImg) to calc the probablilities. Slightly faster than
             %version #1.
             
-            RadiusMM = 10; %search radius (mm) for finding labels
+            if isempty(obj.Def)
+                obj.loadDefFile(varargin{:});
+            else
+                obj.parseInput(varargin{:});
+            end
+
+            RadiusMM = 10; %listening radius (mm) for finding labels
+            if ~isempty(obj.ProbRadius)
+                RadiusMM = obj.ProbRadius;
+            end
             
             Idx = strcmp(regexprep(obj.AtlasNames,'\.nii$',''),AtlasName); 
             if isempty(obj.AtlasImg{Idx})
                 obj.warpAtlas2PatientSpace(AtlasName,varargin{:});
             end
             
-            voxdef = obj.VoxDef{Idx};
             atlasvals = obj.AtlasVals{Idx};
             atlaslabels = obj.AtlasLabels{Idx};
             atlasimg = obj.AtlasImg{Idx};
@@ -257,9 +305,10 @@ classdef LeG_vox2atlaslabel < handle
                 mz = (mz - com(3)).*XYZScale(3);
                 
                 elecimg = (sqrt(mx.^2+my.^2+mz.^2)<=RadiusMM); %1s are sphere around center, 0s everywhere else
+                
                 fullidx = [XIdx(elecimg),YIdx(elecimg),ZIdx(elecimg)]; %full index of electrode sphere
                 
-                sz_vox = size(voxdef);
+                sz_vox = size(atlasimg);
                 lidx = calcLinIdx(sz_vox(1:3),fullidx);
                 AtlasVal = round(atlasimg(lidx));
                 
