@@ -87,12 +87,12 @@ classdef LeG_vox2atlaslabel < handle
                 error('Path to deformation file (DefFile) must be provided!')
             end
             
-            Nii = nifti(obj.DefFile);
-            obj.Def = single(Nii.dat(:,:,:,1,:));
+            Nii = medicalVolume(obj.DefFile); %medical imaging toolbox (faster loading with compressed nifti than niftiread)
+            obj.Def = Nii.Voxels;
             d = size(obj.Def);
             if d(4)~=1 || d(5)~=3, error('Deformation field is wrong!'); end
             obj.Def = reshape(obj.Def,[d(1:3) d(5)]); %imgvox2mnimm image deformation
-            obj.DefMat = Nii.mat;
+            obj.DefMat = Nii.VolumeGeometry.intrinsicToWorldMapping.A(:,[2,1,3,4]);
         end
         
         function [Label,XYZMNImm] = findLabel(obj, XYZIdx, AtlasName, varargin)
@@ -330,6 +330,9 @@ classdef LeG_vox2atlaslabel < handle
             end
             
             atlasfile = fullfile(fileparts(obj.DefFile),['lw',AtlasName,'.nii']);
+            if ~isfile(atlasfile)
+                atlasfile = fullfile(fileparts(obj.DefFile),['lw',AtlasName,'.nii.gz']);
+            end
             if isempty(obj.AtlasImg{Idx})
                 if isfile(atlasfile)
                     obj.AtlasImg(Idx) = {spm_read_vols(spm_vol(atlasfile))};
@@ -371,8 +374,11 @@ classdef LeG_vox2atlaslabel < handle
             %results in the data being scaled when saving and then
             %converted back to integers when loading, which adds a rounding
             %error (i.e. decimal) to each integer.
-            info = spm_vol(obj.DefFile);
-            info = rmfield(info,'private');
+            % info = spm_vol(obj.DefFile); %this takes awhile if DefFile is compressed
+            info = [];
+            info.dim = size(obj.Def,1:3);
+            info.mat = obj.DefMat;
+            % info = rmfield(info,'private');
 %             info = rmfield(info,'pinfo');
             info.pinfo = [1;0;352]; %pinfo(1:2) = scale/offset factors and pinfo(3) = 352 for NIfTI-1 or 544 for NIfTI-2 (see spm_create_vol.m)
             info.dt = [4,0]; %[int16 datatype, little-endian] (16 is float32, 1 is big-endian)
